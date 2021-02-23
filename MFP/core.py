@@ -1,4 +1,12 @@
 
+def correct_url(url:str):
+    # очищаем лишние пробклы
+    url.strip()
+    # если на конце нет '/', то добавляем
+    if not url.endswith('/'):
+        url += '/'
+    return url
+
 class Application:
     """
     Класс создания объекта вызываемого WSGI-сервером.
@@ -19,6 +27,8 @@ class Application:
         """
         # определяем запрошенную страницу
         path = environ['PATH_INFO']
+        # проверка на соответствие и корректировка по необходимости
+        path = correct_url(path)
         # для каждой определяем PC
         if path in self.urls_view:
             page_controller = self.urls_view[path]
