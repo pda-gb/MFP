@@ -25,7 +25,7 @@ class Application:
         else:
             # если страницы нет, то отдаём код 404 и возвращаем ответ в байтах
             start_response('404', [('Content-Type', 'text/html')])
-            return b'<h1>Page not found ! ! !</h1>'
+            return [b'<h1>Page not found ! ! !</h1>']
         request = {}
         # применяем FC
         for fc in self.fronts:
