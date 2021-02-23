@@ -13,7 +13,7 @@ def render(template_file, temp_folder='templates', **kwargs):
     :return: отрендеренный шаблон
     """
     # открываем и читаем файл
-    with open(path.join(template_file, temp_folder), encoding='utf-8') as f:
+    with open(path.join(temp_folder, template_file), encoding='utf-8') as f:
         template = Template(f.read())
     # рендерим с параметрами
     ready_template = template.render(**kwargs)
