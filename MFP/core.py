@@ -1,5 +1,4 @@
-
-def correct_url(url:str):
+def correct_url(url: str):
     # очищаем лишние пробклы
     url.strip()
     # если на конце нет '/', то добавляем
