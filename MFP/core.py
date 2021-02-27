@@ -7,6 +7,44 @@ def correct_url(url:str):
         url += '/'
     return url
 
+
+def pars_input_data(input_data: str):
+    """Парсинг и приведение к словарю  строковых данных входящего
+    GET/POST запроса"""
+    param_request = {}
+    if input_data:
+        # разделяем параметры
+        list_param = input_data.split('&')
+        for i in list_param:
+            # преобразуем в словарь
+            key, value = i.split('=')
+            param_request[key] = value
+    return param_request
+
+
+def get_post_input_data(input_data) -> bytes:
+    """Получение данных от пост-запроса"""
+    param_request = {}
+    if input_data:
+        # узнаём длину тела контента
+        content_len = int(input_data.get('CONTENT_LENGTH'))
+        if content_len:
+            # считываем данные
+            param_request = input_data['wsgi.input'].read(content_len)
+        else:
+            b''
+    return param_request
+
+
+def pars_post_input_data(input_data: bytes) -> dict:
+    """Декодирование и парсинг данных пост-запроса"""
+    param_request = {}
+    if input_data:
+        input_data_str = input_data.decode(encoding='utf-8')
+        param_request = pars_input_data(input_data_str)
+    return param_request
+
+
 class Application:
     """
     Класс создания объекта вызываемого WSGI-сервером.
@@ -29,6 +67,31 @@ class Application:
         path = environ['PATH_INFO']
         # проверка на соответствие и корректировка по необходимости
         path = correct_url(path)
+
+        # определение типа запроса(GET/POST)
+        req_method = environ['REQUEST_METHOD']
+        print(f'================\nREQUEST_METHOD: {req_method}\n'
+              f'================\n')
+
+        # если GET
+        if req_method == 'GET':
+            # получаем строку с параметрами
+            query_string = environ['QUERY_STRING']
+            print(f'================\nQUERY_STRING: {query_string}\n'
+                  f'================\n')
+            request_param = pars_input_data(query_string)
+            print(f'================\nrequest_param: {request_param}\n'
+                  f'================\n')
+        elif req_method == 'POST':
+            # получение данных
+            req_raw_data = get_post_input_data(environ)
+            print(f'================\nreq_raw_data: {req_raw_data}\n'
+                  f'================\n')
+            # парсинг данных, выведение в словарь
+            request_param = pars_post_input_data(req_raw_data)
+            print(f'================\nPOST request_param: {request_param}\n'
+                  f'================\n')
+
         # для каждой определяем PC
         if path in self.urls_view:
             page_controller = self.urls_view[path]
