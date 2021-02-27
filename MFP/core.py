@@ -69,7 +69,7 @@ class Application:
 
         # определение типа запроса(GET/POST)
         req_method = environ['REQUEST_METHOD']
-        print(f'================\nREQUEST_METHOD: {req_method}\n'
+        print(f'================>\nREQUEST_METHOD: {req_method}\n'
               f'================\n')
 
         # если GET
@@ -80,7 +80,7 @@ class Application:
                   f'================\n')
             request_param = pars_input_data(query_string)
             print(f'================\nrequest_param: {request_param}\n'
-                  f'================\n')
+                  f'================<\n')
         elif req_method == 'POST':
             # получение данных
             req_raw_data = get_post_input_data(environ)
@@ -89,7 +89,7 @@ class Application:
             # парсинг данных, выведение в словарь
             request_param = pars_post_input_data(req_raw_data)
             print(f'================\nPOST request_param: {request_param}\n'
-                  f'================\n')
+                  f'================<\n')
 
         # для каждой определяем PC
         if path in self.urls_view:
