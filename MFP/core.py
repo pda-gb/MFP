@@ -1,3 +1,7 @@
+"""Основное приложение фреймворка"""
+import quopri
+
+
 def correct_url(url: str):
     # очищаем лишние пробклы
     url.strip()
@@ -44,6 +48,14 @@ def pars_post_input_data(input_data: bytes) -> dict:
     return param_request
 
 
+def decode_value(value):
+    """ Декодирование в правильном формате (что бы избежать рус. текскт в
+    виде - '%D0%BB%D0%B5%'). """
+    value_bite = bytes(value.replace('%', '=').replace("+", " "), 'UTF-8')
+    value_str = quopri.decodestring(value_bite)
+    return value_str.decode('UTF-8')
+
+
 class Application:
     """
     Класс создания объекта вызываемого WSGI-сервером.
@@ -72,24 +84,29 @@ class Application:
         print(f'================>\nREQUEST_METHOD: {req_method}\n'
               f'================\n')
 
-        # если GET
-        if req_method == 'GET':
-            # получаем строку с параметрами
-            query_string = environ['QUERY_STRING']
-            print(f'================\nQUERY_STRING: {query_string}\n'
-                  f'================\n')
-            request_param = pars_input_data(query_string)
-            print(f'================\nrequest_param: {request_param}\n'
-                  f'================<\n')
-        elif req_method == 'POST':
-            # получение данных
-            req_raw_data = get_post_input_data(environ)
-            print(f'================\nreq_raw_data: {req_raw_data}\n'
-                  f'================\n')
-            # парсинг данных, выведение в словарь
-            request_param = pars_post_input_data(req_raw_data)
-            print(f'================\nPOST request_param: {request_param}\n'
-                  f'================<\n')
+        request = {}
+        post_data = {}
+
+        # получаем строку с параметрами
+        query_string = environ['QUERY_STRING']
+        print(f'================\nQUERY_STRING: {query_string}\n'
+              f'================\n')
+        request_param = pars_input_data(query_string)
+        print(f'================\nrequest_param: {request_param}\n'
+              f'================<\n')
+        # получение данных
+        post_data = get_post_input_data(environ)
+        print(f'================\npost_data: {post_data}\n'
+              f'================\n')
+        # парсинг данных, выведение в словарь
+        post_param = pars_post_input_data(post_data)
+        print(f'================\nPOST request_param: {post_param}\n'
+              f'================<\n')
+
+        # добавляем метод которым пришел запрос
+        request['method'] = req_method
+        request['data'] = post_param
+        request['request_params'] = request_param
 
         # для каждой определяем PC
         if path in self.urls_view:
@@ -98,7 +115,6 @@ class Application:
             # если страницы нет, то отдаём код 404 и возвращаем ответ в байтах
             start_response('404', [('Content-Type', 'text/html')])
             return [b'<h1>Page not found ! ! !</h1>']
-        request = {}
         # применяем FC
         for fc in self.fronts:
             fc(request)
