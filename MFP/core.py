@@ -28,7 +28,7 @@ def pars_input_data(input_data: str):
 def get_post_input_data(input_data) -> bytes:
     """Получение данных от пост-запроса"""
     param_request = {}
-    if input_data:
+    if input_data['REQUEST_METHOD'] == 'POST':
         # узнаём длину тела контента
         content_len = int(input_data.get('CONTENT_LENGTH'))
         if content_len:
